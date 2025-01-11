@@ -4,26 +4,19 @@ from dotenv import load_dotenv
 import os
 import streamlit as st
 
-# Charger les variables d'environnement depuis .env
+
 load_dotenv()
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
-# Configuration de l'API OpenAI
-openai.api_key = os.getenv('OPENAI_API_KEY')  # Charger la clé depuis .env
 
-# Charger les données
 df_soins = pd.read_csv('soins.csv')
 df_regles_metier = pd.read_csv('regles_metier.csv')
 df_patients = pd.read_csv('patients.csv')
 
 def extraire_interventions(texte):
-    """
-    Utilise l'API OpenAI pour extraire les interventions mentionnées dans un paragraphe de texte.
-    Retourne une liste de codes d'intervention valides.
-    """
-    # Liste des codes valides pour guider OpenAI
+
     codes_valides = df_soins['code_intervention'].tolist()
 
-    # Format du message pour l'API de chat
     messages = [
         {"role": "system", "content": f"""
         Tu es un assistant d'infirmiers qui aide à identifier les interventions d'infirmierie dans un texte. 
@@ -70,82 +63,64 @@ def extraire_interventions(texte):
 
     ]
 
-    # Appel à l'API OpenAI
     response = openai.chat.completions.create(
-        model="gpt-4o-mini",  # Utilisez un modèle valide (par exemple, "gpt-4" ou "gpt-3.5-turbo")
+        model="gpt-4o-mini",
         messages=messages,
-        # max_tokens=50,
-        # temperature=0.5
     )
 
-    # Extraction des codes suggérés
+
     codes_suggeres = response.choices[0].message.content.strip()
-    st.write(f"Codes suggérés par OpenAI : {codes_suggeres}")  # Log pour débogage
-    return codes_suggeres.split(", ")  # Retourne une liste de codes
+    st.write(f"Codes suggérés par OpenAI : {codes_suggeres}")
+    return codes_suggeres.split(", ")
 
 
 def mapper_code_intervention(code_suggere):
-    """
-    Vérifie si le code suggéré existe dans la liste des soins.
-    """
-    # Normalisation du code suggéré
-    code_suggere = code_suggere.strip().upper()  # Supprime les espaces et convertit en majuscules
+
+    code_suggere = code_suggere.strip().upper()
 
     if code_suggere in df_soins['code_intervention'].values:
-        st.write(f"Code trouvé : {code_suggere}")  # Log pour débogage
+        st.write(f"Code trouvé : {code_suggere}")
         return code_suggere
     else:
-        st.write(f"Code non trouvé : {code_suggere}")  # Log pour débogage
-        return None  # Code non trouvé
+        st.write(f"Code non trouvé : {code_suggere}")
+        return None
 
 
 def appliquer_regles_metier(codes_intervention):
-    """
-    Applique les règles métier pour calculer le prix total.
-    Si aucune règle n'existe, additionne les prix des soins.
-    """
     prix_total = 0
-    codes_appliques = set()  # Pour éviter de compter deux fois le même code
+    codes_appliques = set()
 
-    # Calculer le prix total sans règles métier
+
     for code in codes_intervention:
         if code not in codes_appliques:
             prix = df_soins.loc[df_soins['code_intervention'] == code, 'prix'].values[0]
-            st.write(f"Prix pour {code} : {prix} euros")  # Log pour débogage
+            st.write(f"Prix pour {code} : {prix} euros")
             prix_total += prix
             codes_appliques.add(code)
 
-    # Vérifier s'il y a une règle métier pour cette combinaison de soins
     for _, regle in df_regles_metier.iterrows():
         if (regle['code_intervention_1'] in codes_intervention and
                 regle['code_intervention_2'] in codes_intervention):
             st.write(
                 f"Règle métier appliquée : {regle['code_intervention_1']} + {regle['code_intervention_2']} = {regle['prix_total']} euros")  # Log pour débogage
-            prix_total = regle['prix_total']  # Appliquer le prix total de la règle
-            break  # On applique la première règle trouvée
+            prix_total = regle['prix_total']
+            break
 
     return prix_total
 
 
 def generer_facture(id_patient, codes_intervention):
-    """
-    Génère une facture pour un patient.
-    """
-    # Récupérer les informations du patient
+
     patient_info = df_patients.loc[df_patients['id_patient'] == id_patient]
 
-    # Vérifier si l'ID du patient existe
     if patient_info.empty:
         st.write(f"Aucun patient trouvé avec l'ID {id_patient}.")
         return
 
-    # Extraire les informations du patient
     patient = patient_info.iloc[0]
 
-    # Calculer le prix total
     prix_total = appliquer_regles_metier(codes_intervention)
 
-    # Afficher la facture
     st.write(f"Facture pour {patient['prenom']} {patient['nom']} (ID: {id_patient})")
     st.write("Soins prodigués :")
     for code in codes_intervention:
@@ -155,37 +130,21 @@ def generer_facture(id_patient, codes_intervention):
 
 
 def assistant_facturation(texte, id_patient):
-    """
-    Assistant Facturation : Interprète un paragraphe de texte, extrait les interventions,
-    mappe les codes, applique les règles métier et génère une facture.
-    """
-    # Extraire les interventions du texte
-    codes_suggeres = extraire_interventions(texte)
-    st.write(f"Codes suggérés : {codes_suggeres}")  # Afficher dans Streamlit
 
-    # Mapper les codes suggérés aux codes valides
+    codes_suggeres = extraire_interventions(texte)
+    st.write(f"Codes suggérés : {codes_suggeres}")
+
     codes_intervention = []
     for code in codes_suggeres:
         code_valide = mapper_code_intervention(code)
         if code_valide:
             codes_intervention.append(code_valide)
 
-    st.write(f"Codes valides mappés : {codes_intervention}")  # Afficher dans Streamlit
+    st.write(f"Codes valides mappés : {codes_intervention}")
 
-    # Générer la facture
     if codes_intervention:
         generer_facture(id_patient, codes_intervention)
-        return f"Facture générée pour le patient {id_patient}"  # Retourner un message de succès
+        return f"Facture générée pour le patient {id_patient}"
     else:
         st.warning("Aucun code valide trouvé pour générer une facture.")
-        return "Aucune facture générée"  # Retourner un message d'échec
-
-
-# Exemple de texte entré par l'infirmier
-texte = "J'ai nettoyé et pansé une plaie chirurgicale, puis j'ai changé le pansement d'une escarre de stade II."
-
-# ID du patient
-id_patient = 8190
-
-# Appel de l'assistant Facturation
-assistant_facturation(texte, id_patient)
+        return "Aucune facture générée"
