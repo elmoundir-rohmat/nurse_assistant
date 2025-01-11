@@ -1,0 +1,31 @@
+code_intervention,description,prix
+INT-0001,Toilette complète d'un patient alité avec changement de literie,50.22
+INT-0002,Aide à la mobilisation d'un patient en fauteuil roulant,124.64
+INT-0003,"Surveillance des constantes vitales (température, pouls, tension artérielle, saturation en oxygène)",124.52
+INT-0004,Administration d'un médicament par voie orale selon prescription médicale,49.71
+INT-0005,Injection intramusculaire d'un vaccin,18.55
+INT-0006,Perfusion intraveineuse de soluté salin,192.19
+INT-0007,Nettoyage et pansement d'une plaie chirurgicale,192.12
+INT-0008,Changement de pansement pour une escarre de stade II,111.06
+INT-0009,Retrait d'agrafes ou de fils de suture,97.04
+INT-0010,Surveillance de la glycémie capillaire et ajustement de l'insuline selon protocole,196.78
+INT-0011,Éducation thérapeutique pour un patient sous anticoagulants,33.26
+INT-0012,Surveillance d'un patient sous oxygénothérapie,176.49
+INT-0013,Pose d'une sonde urinaire à demeure,172.74
+INT-0014,Aspiration des voies respiratoires chez un patient trachéotomisé,145.48
+INT-0015,Prélèvement sanguin pour analyse biologique,81.08
+INT-0016,Pose d'une voie veineuse périphérique,32.49
+INT-0017,Surveillance d'un patient sous chimiothérapie,69.97
+INT-0018,Administration d'une chimiothérapie par voie intraveineuse,75.26
+INT-0019,Suivi d'un patient sous dialyse péritonéale,53.0
+INT-0020,Éducation à l'auto-surveillance glycémique pour un patient diabétique,100.77
+INT-0021,Pansement stérile pour une brûlure au deuxième degré,45.36
+INT-0022,Surveillance d'un patient sous ventilation mécanique,39.94
+INT-0023,Administration d'une antibiothérapie par voie intraveineuse,139.22
+INT-0024,Pose d'un cathéter central,77.28
+INT-0025,Suivi d'un patient sous nutrition parentérale,141.64
+INT-0026,Éducation à l'utilisation d'un inhalateur pour un patient asthmatique,98.6
+INT-0027,Pansement pour une plaie infectée,66.96
+INT-0028,Surveillance d'un patient sous sédation,115.58
+INT-0029,Administration d'une transfusion sanguine,57.17
+INT-0030,Pose d'un dispositif de compression pneumatique intermittente,137.3
